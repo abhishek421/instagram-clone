@@ -1,0 +1,39 @@
+*{
+  margin: 0;
+  /* border: red solid 0.1px; */
+}
+.App{
+ background-color: #eeeeee;
+ 
+ display: flex;
+  flex-flow:column;
+  align-items: center;
+  width: 100%;
+
+}
+
+.app__header{
+
+  display: flex;
+  flex-flow:row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: white;
+}
+
+.app__auth{
+
+  display: flex;
+  flex-flow:row;
+  align-items: center;
+  background-color: white;
+  width: 200px;
+  justify-content: space-evenly;
+
+}
+
+
+.logo{
+  object-fit: contain;
+}
