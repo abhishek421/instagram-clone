@@ -1,49 +1,23 @@
 import React from 'react';
 import { useState} from 'react';
-import {Button, IconButton, Modal, LinearProgress, TextField} from '@material-ui/core';
+import {Button, IconButton, LinearProgress, TextField} from '@material-ui/core';
 import {Delete, AddCircle } from '@material-ui/icons';
-import { makeStyles } from '@material-ui/core/styles';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { storage, db } from './firebase';
 import firebase from "firebase";
 
-function getModalStyle() {
-    const top = 50 ;
-    const left = 50 ;
-  
-    return {
-      top: `${top}%`,
-      left: `${left}%`,
-      transform: `translate(-${top}%, -${left}%)`,
-    };
-  }
-  
-  const useStyles = makeStyles((theme) => ({
-    paper: {
-      position: 'absolute',
-      width: 400,
-      height: 480,
-      backgroundColor: theme.palette.background.paper,
-      boxShadow: theme.shadows[6],
-      padding: theme.spacing(2, 4, 3),
-      display: 'flex',
-      flexFlow: 'column',
-      justifyContent: 'space-evenly',
-      alignItems: 'center'
-    },
-  }));
-
-
-function ImageUpload({user}) {
-    const classes = useStyles();
-    const [modalStyle] = useState(getModalStyle);
+function ImageUpload({username}) {
     const [loc,setLoc]=useState('');
-    const [open,setOpen]=useState(false);
+    const [openUpload,setOpenUpload]=useState(false);
     const [caption,setCaption]=useState('');
     const [image,setImage]=useState(null);
-    const [imgUrl,setImgUrl]=useState('');
     const [progress,setProgress]=useState(0);
 
-    const handleChange =(e) => {
+    const handleChange = (e) => {
         if(e.target.files[0]) {
             setImage(e.target.files[0]);
         }
@@ -70,77 +44,78 @@ function ImageUpload({user}) {
                  .child(image.name)
                  .getDownloadURL()
                  .then(url => {
-                     db.collection("posts").add({
-                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                         caption: caption,
-                         imgPost:url,
-                         location: loc,
-                         username: user
+                    db.collection("posts").add({
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        caption: caption,
+                        imgPost:url,
+                        location: loc,
+                        username: username
 
                      });
-                     setImgUrl(url);
-                 })
+                     setProgress(0);
+                     setCaption('');
+                     setImage(null);
+                     setLoc('');
+                     setOpenUpload(false);
+                 });
              }
-        )
-    }
+        );
+    };
 
     return (
         <div>
-        <IconButton onClick={setOpen(true)}>
-        <AddCircle />
+        <IconButton onClick={() => setOpenUpload(true)}>
+          <AddCircle />
         </IconButton>
-        
-             <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-      >
-        { 
-          <div style={modalStyle} className={classes.paper}>
-          <img 
-        className="logo" 
-        src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png" 
 
-        alt="Logo"
-        />
-
-        
-        {
-            imgUrl?(
-               <div> <img 
-        className="logo" 
-        src={imgUrl} 
-        style={{objectFit:'contain'}}
-        /> 
-        <IconButton onClick={setImgUrl('')}>
-        <Delete />
-        </IconButton> 
-        </div>
-
-            ):
-            (
-                <div><input
-        accept="image/*"
-        type="file"
-        onChange={handleChange}
-       />
-       <LinearProgress variant="determinate" value={progress} />
-       </div>
-            )
-        }
-
-
-       <TextField value={caption} type='text' id="outlined-basic" label="Caption" variant="outlined" onChange={(e) => setCaption(e.target.value)} />
-       <TextField value={loc} type='text' id="outlined-basic" label="Location" variant="outlined" onChange={(e) => setLoc(e.target.value)}/>
-       <Button variant="contained" onClick={handleUpload} color="primary">
-         Post
-        </Button> 
-          
-        
-    </div>}
-      </Modal>
+        <Dialog open={openUpload} onClose={() => setOpenUpload(false)} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Create Post</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Add your Image with a cool caption and other details, to publish your post.
+            </DialogContentText>
+              <LinearProgress variant="determinate" value={progress} />
+              {
+                image?
+                (
+                  <div style={{display:'flex',flexFlow:'row',widows:'100%',justifyContent:'center'}}>
+                    <img 
+                    src={URL.createObjectURL(image)}
+                    alt="Post Preview"
+                    style={{objectFit:"contain",width:'200px',height:'200px',margin:"20px 0"}}
+                    />
+                    <IconButton onClick={() => setImage(null)}>
+                      <Delete />
+                    </IconButton>
+                  </div>
+                ):
+                (
+                  <input
+                  accept="image/*"
+                  type="file"
+                  style={{width:'100%',margin:"20px 0"}}
+                  onChange={handleChange}
+                  />
+                  )
+              }
+              
+              <TextField style={{margin:"10px 0"}} value={caption} type='text' multiline rowsMax={4} fullWidth id="outlined-basic" label="Caption" variant="outlined" onChange={(e) => setCaption(e.target.value)} />
+              <TextField style={{margin:"10px 0"}} value={loc} type='text' fullWidth id="outlined-basic" label="Location" variant="outlined" onChange={(e) => setLoc(e.target.value)}/>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => {setOpenUpload(false); setProgress(0);setCaption('');setImage(null);}} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleUpload} color="primary">
+              Post
+            </Button>
+          </DialogActions>
+      </Dialog>
 
         </div>
     )
 }
+
+//AIzaSyCSfu-KJC1IqOZ0nfC6PsjZInjhlTRjEow google api
 
 export default ImageUpload

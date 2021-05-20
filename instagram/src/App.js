@@ -1,8 +1,9 @@
 import { useState,useEffect} from 'react';
 import './App.css';
-import { db,auth } from './firebase';
+import firebase from "firebase";
+import { db,auth,storage } from './firebase';
 import Post from './Post'
-import {Modal,IconButton,TextField,Button} from '@material-ui/core'
+import {Modal,IconButton,TextField,Button, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { ExitToApp } from '@material-ui/icons';
 import ImageUpload from './imageUpload';
@@ -23,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     position: 'absolute',
     width: 400,
-    height: 480,
+    height: 460,
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[6],
     padding: theme.spacing(2, 4, 3),
@@ -43,12 +44,12 @@ function App() {
   const [modalStyle] = useState(getModalStyle);
   const [username,setUsername]=useState('');
   const [openSignIn,setOpenSignIn]=useState('');
-  const [user,setUser]=useState('');
+  const [user,setUser]=useState();
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
 
   useEffect( ()=>{
-    db.collection('Posts').onSnapshot(snapshot=>{
+    db.collection('posts').orderBy('timestamp','desc').onSnapshot(snapshot=>{
     setPosts(snapshot.docs.map(doc => ({
       id: doc.id,
       post: doc.data()
@@ -62,8 +63,8 @@ function App() {
        if (authUser) {
          console.log(authUser);
          setUser(authUser);
-
-       } else{
+       } 
+       else{
          setUser(null);
        }
     }) 
@@ -73,6 +74,7 @@ function App() {
     }
   }, [user, username]);
 
+  
 
   const signUp = (event) => {
     event.preventDefault()
@@ -101,43 +103,42 @@ function App() {
     <div className="App">
       
       <div className="app__header">
+        <div className="app__header__cnt">
+          <div>
+          <img 
+          className="logo" 
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1280px-Instagram_logo.svg.png" 
+          alt="Logo"
+          />
+          </div> 
+
         
-        <div>
-        <img 
-        className="logo" 
-        src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png" 
+          <div>
 
-        alt="Logo"
-        />
-        </div> 
+            {user? (
+              <div className='app__auth'>
+              <ImageUpload username={user?.displayName} />
+              <IconButton onClick={() => auth.signOut()}>
+                <ExitToApp/>
+              </IconButton> 
+            </div>
+            ):(
+              <div className='app__auth'>
+              <Button variant="contained" onClick={() => setOpen(true)}>
+              SignUp
+            </Button>
 
-
-        <div>
-
-        {user ? (
-          <div className='app__auth'>
-          <ImageUpload user={user?.displayName}/>
-          <IconButton onClick={() => auth.signOut()}>
-           {'Hello, ' + user?.displayName + " "}  <ExitToApp/>
-        </IconButton> 
-        </div>
-        ):(
-          <div className='app__auth'>
-          <Button variant="contained" onClick={() => setOpen(true)}>
-          SignUp
-        </Button>
-
-        <Button variant="contained" onClick={() => setOpenSignIn(true)}>
-         LogIn
-        </Button>
-        </div>
-        )}
-   
-        
-        </div>
-   
-      </div> 
+            <Button variant="contained" onClick={() => setOpenSignIn(true)}>
+            LogIn
+            </Button>
+            </div>
+            )}
       
+            
+            </div>
+          </div>
+      </div>
+
       <Modal
         open={openSignIn}
         onClose={() => setOpenSignIn(false)}
@@ -146,7 +147,7 @@ function App() {
           <div style={modalStyle} className={classes.paper}>
           <img 
         className="logo" 
-        src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png" 
+        src="https://1000logos.net/wp-content/uploads/2017/02/ig-logo.png" 
 
         alt="Logo"
         />
@@ -155,12 +156,7 @@ function App() {
        <TextField value={password} type='password' id="outlined-basic" label="Password" variant="outlined" onChange={(e) => setPassword(e.target.value)}/>
        <Button type='submit' variant="contained" onClick={signIn} color="primary">
          LogIn
-        </Button> 
-          {/* <h4>
-            New User ??? <Button type='submit' variant="text" onClick={setOpen(true)} color="primary">
-         LogIn
         </Button>
-          </h4> */}
         
     </div>}
       </Modal>
@@ -174,7 +170,7 @@ function App() {
           <div style={modalStyle} className={classes.paper}>
           <img 
         className="logo" 
-        src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png" 
+        src="https://1000logos.net/wp-content/uploads/2017/02/ig-logo.png" 
 
         alt="Logo"
         />
@@ -185,22 +181,21 @@ function App() {
        <TextField value={password} type='password' id="outlined-basic" label="Password" variant="outlined" onChange={(e) => setPassword(e.target.value)}/>
        <Button type='submit' variant="contained" onClick={signUp} color="primary">
           SignUp
-        </Button> 
-
-        {/* <h4>
-            Already a User ??? <Button type='submit' variant="text" onClick={setOpenSignIn(true)} color="primary"> 
-         LogIn
         </Button>
-          </h4> */}
 
     </div>}
       </Modal>
 
+      <div className="app__posts">
       {
         posts.map(({id,post}) => (
-          <Post key={id} imgPost={post.imgPost} username={post.username} caption={post.caption} imgProfile={post.imgProfile}/>
+          <Post key={id} id={id} imgPost={post.imgPost} location={post.location} timestamp={post.timestamp} username={post.username} caption={post.caption} imgProfile={post.imgProfile}/>
         ))
       }
+      </div>
+      
+
+    
 
     </div>
   );
