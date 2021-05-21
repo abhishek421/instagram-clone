@@ -1,0 +1,34 @@
+.auth__screen{
+    display: flex;
+    flex-flow: column;
+    min-height: 90vh;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth__login{
+    display: flex;
+    flex-flow: column;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 380px;
+    width: 280px;
+    padding: 1em;
+    border-radius: 5px;
+    border: 0.1px #0000004a solid;
+}
+
+.auth__Rflex{
+    display: flex;
+    flex-flow: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+}
+
+.logo{
+    object-fit: contain;
+    width: 8em;
+    margin: 2px 20px;
+  }

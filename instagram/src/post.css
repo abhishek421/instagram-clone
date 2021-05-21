@@ -5,8 +5,8 @@
     background-color: white;
     border-radius: 5px;
     box-shadow: #c0c0c0 0px 0px 15px;
-
 }
+
 .post__img{
     object-fit: contain;
     width: 340px;
@@ -39,5 +39,22 @@
 .post__cnt{
    padding: 10px;
     
+}
+
+@media only screen and (max-width: 400px) {
+    .post{
+        width: 100%; 
+        margin: 1em 0em;
+        border-radius: 0px;
+        box-shadow: none;
+    }
+
+    .post__img{
+        object-fit: contain;
+        width: 100vw;
+        height:100vw;
+        object-position: center;
+        border-bottom: 0.1px solid #d1d1d1;
+    }
 }
 

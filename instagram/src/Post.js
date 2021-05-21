@@ -20,8 +20,14 @@ function Post(props) {
 
     const deletePost = (event) => {
         event.preventDefault()
-        db.collection("posts").doc(props.id).delete()
+        if (props.user===props.username){
+            db.collection("posts").doc(props.id).delete()
         .catch((error) => alert(error.message))
+        }
+        else{
+            alert("You can delete only your own post !")
+        }
+        
         
         handleClose()
     }
